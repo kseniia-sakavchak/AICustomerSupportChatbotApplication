@@ -1,0 +1,21 @@
+{
+  "name": "ai-customer-chatbot-frontend",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "live-server public",
+    "lint": "eslint src",
+    "format": "prettier --write src"
+  },
+  "dependencies": {
+    "chart.js": "^4.4.0",
+    "dayjs": "^1.11.9",
+    "toastify-js": "^1.12.0",
+    "validator": "^13.11.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.50.0",
+    "prettier": "^3.0.0",
+    "cypress": "^13.0.0"
+  }
+}
+
