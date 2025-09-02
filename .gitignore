@@ -1,1 +1,46 @@
+### Java ###
+*.class
+*.jar
+*.war
+*.ear
+*.iml
+*.log
+
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.ipr
+out/
 target/
+
+### Maven ###
+target/
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.properties
+
+### Gradle ###
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!gradlew
+!gradlew.bat
+
+### Logs ###
+*.log
+logs/
+*.out
+
+### OS ###
+.DS_Store
+Thumbs.db
+
+### Node / Frontend ###
+node_modules/
+dist/
+build/
+*.env
+.env.local
+
+### Docker ###
+/data/
+docker-data/
