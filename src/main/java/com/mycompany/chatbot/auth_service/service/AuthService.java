@@ -1,5 +1,6 @@
 package com.mycompany.chatbot.auth_service.service;
 
+import com.mycompany.chatbot.auth_service.domain.Role;
 import com.mycompany.chatbot.auth_service.domain.User;
 import com.mycompany.chatbot.auth_service.dto.AuthRequest;
 import com.mycompany.chatbot.auth_service.dto.AuthResponse;
@@ -7,7 +8,6 @@ import com.mycompany.chatbot.auth_service.dto.UserRegisterDTO;
 import com.mycompany.chatbot.auth_service.dto.UserResponseDTO;
 import com.mycompany.chatbot.auth_service.mapper.UserMapper;
 import com.mycompany.chatbot.auth_service.repo.UserRepository;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -15,24 +15,29 @@ import java.util.List;
 
 @Service
 public class AuthService {
-    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final JwtService jwtService;
 
-    public AuthService(UserRepository userRepository, JwtService jwtService) {
+    public AuthService(PasswordEncoder passwordEncoder, UserRepository userRepository, JwtService jwtService) {
+        this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.jwtService = jwtService;
     }
 
     public UserResponseDTO registerUser(UserRegisterDTO userRegisterDTO) {
+        userRepository.findByUsername(userRegisterDTO.getUsername())
+                .ifPresent(u -> { throw new RuntimeException("Username already exists"); });
+
         User user = new User();
         user.setUsername(userRegisterDTO.getUsername());
         user.setEmail(userRegisterDTO.getEmail());
         user.setPassword(passwordEncoder.encode(userRegisterDTO.getPassword()));
+        user.setRole(Role.USER);
 
         User savedUser = userRepository.save(user);
 
-        return UserMapper.toDto(user);
+        return UserMapper.toDto(savedUser);
     }
 
     public List<UserResponseDTO> getAllUsers() {
@@ -56,7 +61,7 @@ public class AuthService {
             throw new RuntimeException("Invalid credentials");
         }
 
-        String token = jwtService.generateToken(user.getUsername());
+        String token = jwtService.generateToken(user.getUsername(), user.getRole().name());
         return new AuthResponse(token);
     }
 }
