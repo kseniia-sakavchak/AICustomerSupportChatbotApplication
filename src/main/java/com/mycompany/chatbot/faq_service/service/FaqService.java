@@ -25,11 +25,19 @@ public class FaqService {
     }
 
     public Faq findFaqByQuestion(String question) {
-
+        return faqRepository.findByQuestionContainingIgnoreCase(question)
+                .stream()
+                .findFirst()
+                .orElse(null);
     }
 
-    public Faq getAnswerForQuestion(String question) {
-
+    public String getAnswerForQuestion(String question) {
+        Faq faq = findFaqByQuestion(question);
+        if (faq != null) {
+            return faq.getAnswer();
+        } else {
+            return "Sorry, I don't have an answer for that question.";
+        }
     }
 
     public Faq updateAnswer(Long id, String newAnswer) {
