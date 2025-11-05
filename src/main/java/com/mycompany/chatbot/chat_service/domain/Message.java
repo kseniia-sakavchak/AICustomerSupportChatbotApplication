@@ -2,7 +2,7 @@ package com.mycompany.chatbot.chat_service.domain;
 
 import jakarta.persistence.*;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Table(name = "messages")
@@ -14,15 +14,17 @@ public class Message {
 
     private String sender;
     private String content;
-    private LocalDateTime timestamp;
+    private Date timestamp;
+    private String chatId;
 
     public Message() {
     }
 
-    public Message(String sender, String content, LocalDateTime timestamp) {
+    public Message(String sender, String content, Date timestamp, String chatId) {
         this.sender = sender;
         this.content = content;
         this.timestamp = timestamp;
+        this.chatId = chatId;
     }
 
     public Long getId() {
@@ -46,10 +48,17 @@ public class Message {
         this.content = content;
     }
 
-    public LocalDateTime getTimestamp() {
+    public Date getTimestamp() {
         return timestamp;
     }
-    public void setTimestamp(LocalDateTime timestamp) {
+    public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public String getChatId() {
+        return chatId;
+    }
+    public void setChatId(String chatId) {
+        this.chatId = chatId;
     }
 }
