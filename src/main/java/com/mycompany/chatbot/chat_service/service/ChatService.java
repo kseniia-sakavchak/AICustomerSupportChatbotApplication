@@ -21,10 +21,6 @@ public class ChatService {
         this.messageMapper = messageMapper;
     }
 
-    public Message saveMessage(Message message) {
-        return messageRepository.save(message);
-    }
-
     public List<Message> getAllMessages() {
         return messageRepository.findAll();
     }

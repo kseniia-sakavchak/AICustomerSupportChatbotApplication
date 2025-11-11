@@ -1,7 +1,10 @@
 package com.mycompany.chatbot.chat_service.web;
 
+import com.mycompany.chatbot.chat_service.domain.ChatResponseDto;
 import com.mycompany.chatbot.chat_service.domain.Message;
+import com.mycompany.chatbot.chat_service.domain.MessageCreateDto;
 import com.mycompany.chatbot.chat_service.service.ChatService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,23 +18,27 @@ public class ChatHistoryController {
         this.chatService = chatService;
     }
 
+    @PostMapping
+    public ResponseEntity<ChatResponseDto> createMessage(@RequestBody MessageCreateDto dto) {
+        ChatResponseDto response = chatService.createMessage(dto);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping
-    public List<Message> getAllMessages() {
-        return chatService.getAllMessages();
+    public ResponseEntity<List<?>> getAllMessages() {
+        return ResponseEntity.ok(chatService.getAllMessages());
     }
 
     @GetMapping("/{id}")
-    public Message getMessageById(@PathVariable Long id) {
-        return chatService.getMessageById(id).orElse(null);
-    }
-
-    @PostMapping
-    public Message saveMessage(@RequestBody Message message) {
-        return chatService.saveMessage(message);
+    public ResponseEntity<?> getMessageById(@PathVariable Long id) {
+        return chatService.getMessageById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public void deleteMessage(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteMessage(@PathVariable Long id) {
         chatService.deleteMessage(id);
+        return ResponseEntity.noContent().build();
     }
 }
