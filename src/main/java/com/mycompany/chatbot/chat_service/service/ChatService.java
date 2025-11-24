@@ -1,5 +1,6 @@
 package com.mycompany.chatbot.chat_service.service;
 
+import com.mycompany.chatbot.chat_service.client.FaqClient;
 import com.mycompany.chatbot.chat_service.domain.ChatResponseDto;
 import com.mycompany.chatbot.chat_service.domain.Message;
 import com.mycompany.chatbot.chat_service.domain.MessageCreateDto;
@@ -9,16 +10,19 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Date;
 
 @Service
 public class ChatService {
 
     private final MessageRepository messageRepository;
     private final MessageMapper messageMapper;
+    private final FaqClient faqClient;
 
-    public ChatService(MessageRepository messageRepository, MessageMapper messageMapper) {
+    public ChatService(MessageRepository messageRepository, MessageMapper messageMapper, FaqClient faqClient) {
         this.messageRepository = messageRepository;
         this.messageMapper = messageMapper;
+        this.faqClient = faqClient;
     }
 
     public List<Message> getAllMessages() {
@@ -36,6 +40,23 @@ public class ChatService {
     public ChatResponseDto createMessage(MessageCreateDto dto) {
         Message message = messageMapper.toEntity(dto);
         Message savedMessage = messageRepository.save(message);
-        return messageMapper.toDto(savedMessage);
+        String botResponse = processUserMessage(savedMessage.getContent());
+
+        ChatResponseDto response = new ChatResponseDto();
+        response.setId(savedMessage.getId());
+        response.setSender("bot");
+        response.setContent(botResponse);
+        response.setChatId(savedMessage.getChatId());
+        response.setTimestamp(new Date());
+
+        return response;
+    }
+
+    public String processUserMessage(String messageText) {
+        if (messageText.startsWith("/faq ")) {
+            String question = messageText.substring(5);
+            return faqClient.getAnswer(question);
+        }
+        return "Echo: " + messageText;
     }
 }

@@ -25,7 +25,7 @@ public class ChatHistoryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<?>> getAllMessages() {
+    public ResponseEntity<List<Message>> getAllMessages() {
         return ResponseEntity.ok(chatService.getAllMessages());
     }
 
