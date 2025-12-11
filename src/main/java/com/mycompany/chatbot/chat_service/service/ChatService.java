@@ -42,8 +42,15 @@ public class ChatService {
         Message savedMessage = messageRepository.save(message);
         String botResponse = processUserMessage(savedMessage.getContent());
 
+        Message botMessage = new Message();
+        botMessage.setChatId(message.getChatId());
+        botMessage.setSender("bot");
+        botMessage.setContent(botResponse);
+        botMessage.setTimestamp(new Date());
+        botMessage = messageRepository.save(botMessage);
+
         ChatResponseDto response = new ChatResponseDto();
-        response.setId(savedMessage.getId());
+        response.setId(botMessage.getId());
         response.setSender("bot");
         response.setContent(botResponse);
         response.setChatId(savedMessage.getChatId());
