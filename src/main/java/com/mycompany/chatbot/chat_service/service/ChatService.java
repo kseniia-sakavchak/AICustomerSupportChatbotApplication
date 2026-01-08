@@ -80,4 +80,6 @@ public class ChatService {
         }
         return "Echo: " + messageText;
     }
+
+    public
 }
