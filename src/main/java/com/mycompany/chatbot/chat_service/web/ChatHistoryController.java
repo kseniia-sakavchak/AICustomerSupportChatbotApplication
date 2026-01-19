@@ -1,5 +1,6 @@
 package com.mycompany.chatbot.chat_service.web;
 
+import com.mycompany.chatbot.chat_service.domain.ChatHistoryDto;
 import com.mycompany.chatbot.chat_service.domain.ChatResponseDto;
 import com.mycompany.chatbot.chat_service.domain.Message;
 import com.mycompany.chatbot.chat_service.domain.MessageCreateDto;
@@ -27,6 +28,11 @@ public class ChatHistoryController {
     @GetMapping
     public ResponseEntity<List<Message>> getAllMessages() {
         return ResponseEntity.ok(chatService.getAllMessages());
+    }
+
+    @GetMapping("/{chatId}/history")
+    public ResponseEntity<ChatHistoryDto> getChatHistoryDto(@PathVariable String chatId) {
+        return ResponseEntity.ok(chatService.getChatHistory(chatId));
     }
 
     @GetMapping("/{id}")

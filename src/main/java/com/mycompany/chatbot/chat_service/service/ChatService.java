@@ -1,5 +1,6 @@
 package com.mycompany.chatbot.chat_service.service;
 
+import com.mycompany.chatbot.chat_service.domain.ChatHistoryDto;
 import com.mycompany.chatbot.chat_service.domain.ChatResponseDto;
 import com.mycompany.chatbot.chat_service.domain.Message;
 import com.mycompany.chatbot.chat_service.domain.MessageCreateDto;
@@ -8,9 +9,7 @@ import com.mycompany.chatbot.chat_service.repo.MessageRepository;
 import com.mycompany.chatbot.faq_service.service.FaqService;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Date;
+import java.util.*;
 
 @Service
 public class ChatService {
@@ -81,5 +80,10 @@ public class ChatService {
         return "Echo: " + messageText;
     }
 
-    public
+    public ChatHistoryDto getChatHistory(String chatId) {
+        List<Message> messages = messageRepository.findTop50ByChatIdOrderByTimestampDesc(chatId);
+        Collections.reverse(messages);
+        List<ChatResponseDto> messageDto = messages.stream().map(messageMapper::toDto).toList();
+        return new ChatHistoryDto(chatId, messageDto);
+    }
 }
