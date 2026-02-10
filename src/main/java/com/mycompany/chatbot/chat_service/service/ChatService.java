@@ -1,9 +1,7 @@
 package com.mycompany.chatbot.chat_service.service;
 
-import com.mycompany.chatbot.chat_service.domain.ChatHistoryDto;
-import com.mycompany.chatbot.chat_service.domain.ChatResponseDto;
-import com.mycompany.chatbot.chat_service.domain.Message;
-import com.mycompany.chatbot.chat_service.domain.MessageCreateDto;
+import com.mycompany.chatbot.ai_service.cache.AiCacheService;
+import com.mycompany.chatbot.chat_service.domain.*;
 import com.mycompany.chatbot.chat_service.mapper.MessageMapper;
 import com.mycompany.chatbot.chat_service.repo.MessageRepository;
 import com.mycompany.chatbot.faq_service.service.FaqService;
@@ -38,7 +36,8 @@ public class ChatService {
 
     public ChatResponseDto createMessage(MessageCreateDto dto) {
         Message savedMessage = saveUserMessage(dto);
-        String botResponse = processUserMessage(savedMessage.getContent());
+        ResponseMode mode = dto.getMode() != null ? dto.getMode() : ResponseMode.FAQ;
+        String botResponse = processUserMessage(savedMessage.getContent(), mode);
 
         Message botMessage = saveBotMessage(savedMessage.getChatId(), botResponse);
         return buildBotResponseMessage(botMessage);
@@ -72,12 +71,12 @@ public class ChatService {
         return response;
     }
 
-    public String processUserMessage(String messageText) {
-        if (messageText.startsWith("/faq ")) {
-            String question = messageText.substring(5);
-            return faqService.getAnswerForQuestion(question);
-        }
-        return "Echo: " + messageText;
+    public String processUserMessage(String messageText, ResponseMode mode) {
+        return switch (mode) {
+            case FAQ -> faqService.getAnswerForQuestion(messageText);
+            case AI -> null;
+            case HUMAN -> "Our support agent will reply to you shortly.";
+        };
     }
 
     public ChatHistoryDto getChatHistory(String chatId) {
