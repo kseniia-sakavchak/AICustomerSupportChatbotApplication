@@ -42,9 +42,15 @@ public class ChatHistoryController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/message/{id}")
     public ResponseEntity<Void> deleteMessage(@PathVariable Long id) {
         chatService.deleteMessage(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{chatId}")
+    public ResponseEntity<Void> deleteChat(@PathVariable String chatId) {
+        chatService.deleteChat(chatId);
         return ResponseEntity.noContent().build();
     }
 }

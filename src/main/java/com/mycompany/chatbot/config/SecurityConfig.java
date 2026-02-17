@@ -29,7 +29,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/register", "/auth/login").permitAll()
                         .requestMatchers("/ws-chat/**").permitAll()
-                        .requestMatchers("api/chat/**").permitAll()
+                        .requestMatchers("/api/chat/**").permitAll()
 //                        .requestMatchers("/admin/**").hasRole("ADMIN")
 //                        .requestMatchers("/user/**").hasRole("USER")
                         .anyRequest().authenticated()

@@ -315,6 +315,9 @@ function switchChat(chatId) {
     }
 
     function deleteChat(chatId) {
+    fetch("http://localhost:8080/api/chat/" + chatId, { method: "DELETE" })
+         .catch(() => {});
+
     const chats = getChats().filter(id => id !== chatId);
     localStorage.setItem("chats", JSON.stringify(chats));
 

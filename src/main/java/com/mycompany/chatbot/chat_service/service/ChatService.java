@@ -37,10 +37,14 @@ public class ChatService {
         messageRepository.deleteById(id);
     }
 
+    public void deleteChat(String chatId) {
+        messageRepository.deleteByChatId(chatId);
+    }
+
     public ChatResponseDto createMessage(MessageCreateDto dto) {
         Message savedMessage = saveUserMessage(dto);
         ResponseMode mode = dto.getMode() != null ? dto.getMode() : ResponseMode.FAQ;
-        String botResponse = processUserMessage(savedMessage.getContent(), savedMessage.getContent(), mode);
+        String botResponse = processUserMessage(savedMessage.getChatId(), savedMessage.getContent(), mode);
 
         Message botMessage = saveBotMessage(savedMessage.getChatId(), botResponse);
         return buildBotResponseMessage(botMessage);
