@@ -7,6 +7,7 @@ import com.mycompany.chatbot.chat_service.mapper.MessageMapper;
 import com.mycompany.chatbot.chat_service.repo.MessageRepository;
 import com.mycompany.chatbot.faq_service.service.FaqService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -37,6 +38,7 @@ public class ChatService {
         messageRepository.deleteById(id);
     }
 
+    @Transactional
     public void deleteChat(String chatId) {
         messageRepository.deleteByChatId(chatId);
     }

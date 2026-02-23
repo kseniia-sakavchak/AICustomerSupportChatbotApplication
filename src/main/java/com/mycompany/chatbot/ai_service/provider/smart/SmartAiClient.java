@@ -1,4 +1,4 @@
-package com.mycompany.chatbot.ai_service.provider.fake;
+package com.mycompany.chatbot.ai_service.provider.smart;
 
 import com.mycompany.chatbot.ai_service.core.AiClient;
 import com.mycompany.chatbot.ai_service.core.AiMessage;
@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Locale;
 
-@Component
-public class FakeAiClient implements AiClient {
+@Component("smart")
+public class SmartAiClient implements AiClient {
 
     @Override
     public String generateAnswer(String question, List<AiMessage> history) {
