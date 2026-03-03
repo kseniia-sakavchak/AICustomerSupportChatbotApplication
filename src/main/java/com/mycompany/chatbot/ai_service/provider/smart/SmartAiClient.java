@@ -26,11 +26,24 @@ public class SmartAiClient implements AiClient {
             Intent prevIntent = detectIntent(lastAssistant == null ? "" : lastAssistant);
 
             String followUp = switch (prevIntent) {
-                case EMAIL_CHANGE -> "Do you see a verification step? If yes — do you receive the email/code?";
-                case BILLING_PAYMENT_FAILED -> "What error do you see? And what payment method are you using (card/PayPal)?";
-                case LOGIN_2FA -> "Is it SMS 2FA or an authenticator app? Do you get any code at all?";
-                case SUBSCRIPTION_CANCEL -> "Do you want to cancel renewal only, or close the account too?";
-                default -> "What exactly happens when you try it (error text / which step fails)?";
+                case EMAIL_CHANGE ->
+                        "Do you see a verification step? If yes — do you receive the email/code (check spam too)?";
+                case BILLING_PAYMENT_FAILED ->
+                        "What exact error do you see? And what payment method are you using (card/PayPal)?";
+                case LOGIN_2FA ->
+                        "Is it SMS 2FA or an authenticator app? Do you receive any code at all?";
+                case SUBSCRIPTION_CANCEL ->
+                        "Do you want to cancel renewal only, or close the account too?";
+                case PASSWORD_RESET ->
+                        "Do you receive the reset email? If not — what email address are you using and did you check spam?";
+                case PLAN_UPGRADE_DOWNGRADE ->
+                        "Which plan are you switching from/to? Do you see any error on the billing page?";
+                case REFUND ->
+                        "What’s your order ID and purchase date? Also, was it a monthly or annual plan?";
+                case INVOICE ->
+                        "Do you need a standard receipt or a VAT/company invoice? What’s your billing country?";
+                case OTHER ->
+                        "What exactly happens when you try it (error text / which step fails)?";
             };
 
             return lastAssistant != null
