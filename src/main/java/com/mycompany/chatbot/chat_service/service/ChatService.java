@@ -83,7 +83,14 @@ public class ChatService {
     public String processUserMessage(String chatId, String messageText, ResponseMode mode) {
         return switch (mode) {
             case FAQ -> faqService.getAnswerForQuestion(messageText);
-            case AI -> aiService.getAnswer(messageText, buildAiHistory(chatId, 20));
+            case AI -> {
+                try {
+                    yield aiService.getAnswer(messageText, buildAiHistory(chatId, 20));
+                } catch (Exception e) {
+                    System.out.println("AI failed: " + e.getMessage());
+                    yield "Sorry — I had a technical issue generating an answer. Please try again, or switch to HUMAN support mode.";
+                }
+            }
             case HUMAN -> "Our support agent will reply to you shortly.";
         };
     }
