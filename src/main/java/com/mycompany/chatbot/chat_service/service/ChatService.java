@@ -46,7 +46,13 @@ public class ChatService {
     public ChatResponseDto createMessage(MessageCreateDto dto) {
         Message savedMessage = saveUserMessage(dto);
         ResponseMode mode = dto.getMode() != null ? dto.getMode() : ResponseMode.FAQ;
+
+        System.out.println("USER MESSAGE: " + savedMessage.getContent());
+        System.out.println("MODE: " + mode);
+
         String botResponse = processUserMessage(savedMessage.getChatId(), savedMessage.getContent(), mode);
+
+        System.out.println("BOT RESPONSE: " + botResponse);
 
         Message botMessage = saveBotMessage(savedMessage.getChatId(), botResponse);
         return buildBotResponseMessage(botMessage);
