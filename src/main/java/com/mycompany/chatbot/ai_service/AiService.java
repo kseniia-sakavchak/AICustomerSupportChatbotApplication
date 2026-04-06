@@ -16,6 +16,12 @@ public class AiService {
     }
 
     public String getAnswer(String question, List<AiMessage> history) {
-        return aiClient.generateAnswer(question, history);
+        String answer = aiClient.generateAnswer(question, history);
+
+        if (answer == null || answer.isBlank()) {
+            return "I’m sorry — I couldn’t understand your issue. Please describe what happened.";
+        }
+
+        return answer;
     }
 }
