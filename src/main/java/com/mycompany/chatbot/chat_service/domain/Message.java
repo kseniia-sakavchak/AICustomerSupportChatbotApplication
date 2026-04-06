@@ -13,6 +13,8 @@ public class Message {
     private Long id;
 
     private String sender;
+
+    @Column(columnDefinition = "TEXT")
     private String content;
     private Date timestamp;
     private String chatId;
