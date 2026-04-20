@@ -1,14 +1,25 @@
 package com.mycompany.chatbot.ai_service.provider.smart;
 
+import java.util.List;
+import java.util.Random;
+
 public class SmartAiResponses {
 
     private SmartAiResponses() {
     }
 
     public static String passwordReset() {
-        return "Sure — here’s the fastest way to reset your password:\n" +
-                "Settings → Security → Reset password.\n" +
-                "If you don’t get the reset email, check spam and make sure you entered the correct address.";
+        List<String> responses = List.of(
+                "Sure — here’s the fastest way to reset your password:\n" +
+                        "Settings → Security → Reset password.\n" +
+                        "If you don’t get the reset email, check spam and make sure you entered the correct address.",
+
+                "You can reset your password in:\n" +
+                        "Settings → Security → Reset password.\n" +
+                        "Make sure to check your spam folder if the email doesn’t arrive."
+        );
+
+        return responses.get(new Random().nextInt(responses.size()));
     }
 
     public static String login2fa() {
@@ -100,5 +111,9 @@ public class SmartAiResponses {
 
     public static String failureInvoice() {
         return "Do you need a regular receipt or a VAT/company invoice? What’s your billing country?";
+    }
+
+    public static String clarifyShortReply() {
+        return "Could you clarify what exactly is not working? For example, are you having trouble with login, password, or verification?";
     }
 }

@@ -16,12 +16,16 @@ public class AiService {
     }
 
     public String getAnswer(String question, List<AiMessage> history) {
-        String answer = aiClient.generateAnswer(question, history);
+        try {
+            String answer = aiClient.generateAnswer(question, history);
 
-        if (answer == null || answer.isBlank()) {
-            return "I’m sorry — I couldn’t understand your issue. Please describe what happened.";
+            if (answer == null || answer.isBlank()) {
+                return "I’m sorry — I couldn’t understand your issue. Please describe what happened.";
+            }
+
+            return answer;
+        } catch (Exception e) {
+            return "I’m sorry — something went wrong while processing your request. Please try again.";
         }
-
-        return answer;
     }
 }
