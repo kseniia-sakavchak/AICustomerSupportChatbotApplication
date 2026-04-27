@@ -6,10 +6,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class FaqService {
-    private FaqRepository faqRepository;
+    private final FaqRepository faqRepository;
+    private final FaqSearchService faqSearchService;
 
-    public FaqService(FaqRepository faqRepository) {
+    public FaqService(FaqRepository faqRepository, FaqSearchService faqSearchService) {
         this.faqRepository = faqRepository;
+        this.faqSearchService = faqSearchService;
     }
 
     public Faq saveFaq(Faq faq) {
@@ -25,14 +27,11 @@ public class FaqService {
     }
 
     public Faq findFaqByQuestion(String question) {
-        return faqRepository.findByQuestionContainingIgnoreCase(question)
-                .stream()
-                .findFirst()
-                .orElse(null);
+        return faqSearchService.findBestMatch(question);
     }
 
     public String getAnswerForQuestion(String question) {
-        Faq faq = findFaqByQuestion(question);
+        Faq faq = faqSearchService.findBestMatch(question);
         if (faq != null) {
             return faq.getAnswer();
         } else {
@@ -42,6 +41,15 @@ public class FaqService {
 
     public Faq updateAnswer(Long id, String newAnswer) {
         Faq faq = findFaqById(id);
+
+        if (faq == null) {
+            throw new IllegalArgumentException("FAQ not found with id: " + id);
+        }
+
+        if (newAnswer == null || newAnswer.isBlank()) {
+            throw new IllegalArgumentException("FAQ answer must not be empty");
+        }
+
         faq.setAnswer(newAnswer);
         return faqRepository.save(faq);
     }
