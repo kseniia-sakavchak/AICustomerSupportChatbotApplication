@@ -1,5 +1,6 @@
 package com.mycompany.chatbot.faq_service.service;
 
+import com.mycompany.chatbot.common.util.ValidationUtils;
 import com.mycompany.chatbot.faq_service.domain.Faq;
 import com.mycompany.chatbot.faq_service.repo.FaqRepository;
 import org.springframework.stereotype.Service;
@@ -40,14 +41,13 @@ public class FaqService {
     }
 
     public Faq updateAnswer(Long id, String newAnswer) {
+        ValidationUtils.requireId(id, "FAQ ID");
+        ValidationUtils.requireText(newAnswer, "FAQ answer");
+
         Faq faq = findFaqById(id);
 
         if (faq == null) {
             throw new IllegalArgumentException("FAQ not found with id: " + id);
-        }
-
-        if (newAnswer == null || newAnswer.isBlank()) {
-            throw new IllegalArgumentException("FAQ answer must not be empty");
         }
 
         faq.setAnswer(newAnswer);

@@ -1,5 +1,6 @@
 package com.mycompany.chatbot.faq_service.service;
 
+import com.mycompany.chatbot.common.util.TextUtils;
 import com.mycompany.chatbot.faq_service.domain.Faq;
 import com.mycompany.chatbot.faq_service.repo.FaqRepository;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,7 @@ public class FaqSearchService {
     }
 
     public Faq findBestMatch(String question) {
-        if(question == null || question.isBlank()) {
+        if(TextUtils.isBlank(question)) {
             return null;
         }
 
@@ -45,7 +46,7 @@ public class FaqSearchService {
     }
 
     private Set<String> tokenize(String text) {
-        return Arrays.stream(text.toLowerCase().split("\\W+"))
+        return Arrays.stream(TextUtils.normalize(text).split("\\W+"))
                 .filter(word -> word.length() > 2)
                 .collect(Collectors.toSet());
     }
