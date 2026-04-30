@@ -1,4 +1,4 @@
 package com.mycompany.chatbot.ai_service.core;
 
-public class AiMessage {
+public record AiMessage(String role, String content) {
 }

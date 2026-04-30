@@ -1,15 +1,18 @@
 package com.mycompany.chatbot.faq_service.service;
 
+import com.mycompany.chatbot.common.util.ValidationUtils;
 import com.mycompany.chatbot.faq_service.domain.Faq;
 import com.mycompany.chatbot.faq_service.repo.FaqRepository;
 import org.springframework.stereotype.Service;
 
 @Service
 public class FaqService {
-    private FaqRepository faqRepository;
+    private final FaqRepository faqRepository;
+    private final FaqSearchService faqSearchService;
 
-    public FaqService(FaqRepository faqRepository) {
+    public FaqService(FaqRepository faqRepository, FaqSearchService faqSearchService) {
         this.faqRepository = faqRepository;
+        this.faqSearchService = faqSearchService;
     }
 
     public Faq saveFaq(Faq faq) {
@@ -25,14 +28,11 @@ public class FaqService {
     }
 
     public Faq findFaqByQuestion(String question) {
-        return faqRepository.findByQuestionContainingIgnoreCase(question)
-                .stream()
-                .findFirst()
-                .orElse(null);
+        return faqSearchService.findBestMatch(question);
     }
 
     public String getAnswerForQuestion(String question) {
-        Faq faq = findFaqByQuestion(question);
+        Faq faq = faqSearchService.findBestMatch(question);
         if (faq != null) {
             return faq.getAnswer();
         } else {
@@ -41,7 +41,15 @@ public class FaqService {
     }
 
     public Faq updateAnswer(Long id, String newAnswer) {
+        ValidationUtils.requireId(id, "FAQ ID");
+        ValidationUtils.requireText(newAnswer, "FAQ answer");
+
         Faq faq = findFaqById(id);
+
+        if (faq == null) {
+            throw new IllegalArgumentException("FAQ not found with id: " + id);
+        }
+
         faq.setAnswer(newAnswer);
         return faqRepository.save(faq);
     }

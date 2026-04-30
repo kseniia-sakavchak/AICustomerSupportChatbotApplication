@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Support Chat Demo</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+        }
+
+        /* LEFT SIDEBAR */
+        .sidebar {
+            width: 260px;
+            border-right: 1px solid #ddd;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .sidebar h3 {
+            margin-top: 0;
+        }
+
+        .chat-item {
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .chat-item:hover {
+            background: #f0f0f0;
+        }
+
+        .chat-item.active {
+            background: #e0eaff;
+        }
+
+        /* MAIN CHAT */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .mode-buttons button {
+            margin-right: 5px;
+        }
+
+        .messages {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            background: #fafafa;
+        }
+
+        .message {
+            margin-bottom: 8px;
+        }
+
+        .user {
+            font-weight: bold;
+        }
+
+        .bot {
+            color: #0a4;
+        }
+
+        .system {
+            color: gray;
+            font-style: italic;
+        }
+
+        .input-area {
+            padding: 10px;
+            border-top: 1px solid #ddd;
+        }
+
+        input[type="text"] {
+            width: 80%;
+            padding: 6px;
+        }
+
+        .chat-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .chat-row:hover {
+            background: #f0f0f0;
+        }
+
+        .chat-row.active {
+            background: #e0eaff;
+        }
+
+        .chat-delete {
+            opacity: 0;
+            pointer-events: none;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 8px;
+        }
+
+        .chat-row:hover .chat-delete {
+            opacity: 1;
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body>
+
+<!-- LEFT -->
+<div class="sidebar">
+    <h3>Chats</h3>
+    <button onclick="newChat()">New chat</button>
+    <div id="chatList"></div>
+</div>
+
+<!-- RIGHT -->
+<div class="chat-container">
+
+    <div class="chat-header">
+        <b>Mode:</b>
+        <div class="mode-buttons">
+            <button onclick="setMode('FAQ')">FAQ Bot</button>
+            <button onclick="setMode('AI')">AI Assistant</button>
+            <button onclick="setMode('HUMAN')">Human Support</button>
+        </div>
+        <div style="margin-top:5px;">
+            Current mode: <b id="currentMode">FAQ</b>
+        </div>
+    </div>
+
+    <div id="messages" class="messages"></div>
+
+    <div class="input-area">
+        <input type="text" id="messageInput" placeholder="Type your message..." />
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+<script>
+    let stompClient = null;
+    let currentChatId = null;
+    let currentMode = "FAQ";
+
+    /* ------------------ CHAT ID ------------------ */
+    function generateChatId() {
+        return "chat-" + Date.now();
+    }
+
+    function newChat() {
+        currentChatId = generateChatId();
+        saveChat(currentChatId);
+        connect();
+        loadHistory();
+        renderChatList();
+        clearMessages();
+        showSystem("New chat started");
+    }
+
+    /* ------------------ STORAGE ------------------ */
+    function getChats() {
+        return JSON.parse(localStorage.getItem("chats") || "[]");
+    }
+
+    function saveChat(chatId) {
+        let chats = getChats();
+        if (!chats.includes(chatId)) {
+            chats.unshift(chatId);
+            localStorage.setItem("chats", JSON.stringify(chats));
+        }
+    }
+
+    function renderChatList() {
+        const list = document.getElementById("chatList");
+        list.innerHTML = "";
+        getChats().forEach(chatId => {
+            const div = document.createElement("div");
+            div.className = "chat-item" + (chatId === currentChatId ? " active" : "");
+            div.innerText = chatId;
+            div.onclick = () => switchChat(chatId);
+            list.appendChild(div);
+        });
+    }
+
+function switchChat(chatId) {
+        currentChatId = chatId;
+        connect();
+        loadHistory();
+        renderChatList();
+        clearMessages();
+        showSystem("Switched to " + chatId);
+    }
+
+    /* ------------------ MODE ------------------ */
+    function setMode(mode) {
+        currentMode = mode;
+        document.getElementById("currentMode").innerText = mode;
+    }
+
+    /* ------------------ WEBSOCKET ------------------ */
+    function connect() {
+        if (stompClient) return;
+
+        const socket = new SockJS("http://localhost:8080/ws-chat");
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, () => {
+            stompClient.subscribe("/topic/chat/" + currentChatId, msg => {
+                const data = JSON.parse(msg.body);
+                showMessage(data.sender, data.content);
+            });
+        });
+    }
+
+    /* ------------------ HISTORY ------------------ */
+    function loadHistory() {
+        fetch("http://localhost:8080/api/chat/" + currentChatId + "/history")
+            .then(r => r.json())
+            .then(data => {
+                clearMessages();
+                data.messages.forEach(m => showMessage(m.sender, m.content));
+            })
+            .catch(() => showSystem("Error loading history"));
+    }
+
+    /* ------------------ SEND ------------------ */
+    function sendMessage() {
+        const text = document.getElementById("messageInput").value.trim();
+        if (!text) return;
+
+        showMessage("user", text);
+
+        stompClient.send(
+            "/app/chat/" + currentChatId,
+            {},
+            JSON.stringify({
+                sender: "user",
+                content: text,
+                mode: currentMode
+            })
+        );
+
+        document.getElementById("messageInput").value = "";
+    }
+
+    /* ------------------ UI HELPERS ------------------ */
+    function showMessage(sender, text) {
+        const div = document.createElement("div");
+        div.className = "message " + sender;
+        div.innerText = sender + ": " + text;
+        document.getElementById("messages").appendChild(div);
+        div.scrollIntoView();
+    }
+
+    function showSystem(text) {
+        const div = document.createElement("div");
+        div.className = "message system";
+        div.innerText = text;
+        document.getElementById("messages").appendChild(div);
+    }
+
+    function clearMessages() {
+        document.getElementById("messages").innerHTML = "";
+    }
+
+    /* INIT */
+    newChat();
+
+    function renderChatList() {
+    const list = document.getElementById("chatList");
+    list.innerHTML = "";
+
+    getChats().forEach(chatId => {
+        const row = document.createElement("div");
+        row.className = "chat-row" + (chatId === currentChatId ? " active" : "");
+        row.onclick = () => switchChat(chatId);
+
+        const title = document.createElement("span");
+        title.innerText = chatId;
+
+        const del = document.createElement("button");
+        del.className = "chat-delete";
+        del.type = "button";
+        del.innerText = "🗑";
+        del.title = "Delete chat";
+        del.onclick = (e) => {
+            e.stopPropagation(); // щоб не переключало чат при кліку
+            deleteChat(chatId);
+        };
+
+        row.appendChild(title);
+        row.appendChild(del);
+        list.appendChild(row);
+    });
+    }
+
+    function deleteChat(chatId) {
+    fetch("http://localhost:8080/api/chat/" + chatId, { method: "DELETE" })
+         .catch(() => {});
+
+    const chats = getChats().filter(id => id !== chatId);
+    localStorage.setItem("chats", JSON.stringify(chats));
+
+    if (currentChatId === chatId) {
+        if (chats.length > 0) {
+            switchChat(chats[0]);
+        } else {
+            newChat();
+            return;
+        }
+    }
+    renderChatList();
+    if (!confirm("Delete this chat?")) return;
+}
+</script>
+
+</body>
+</html>
