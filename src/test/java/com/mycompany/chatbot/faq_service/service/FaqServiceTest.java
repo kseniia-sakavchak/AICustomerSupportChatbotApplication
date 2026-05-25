@@ -71,8 +71,57 @@ class FaqServiceTest {
     void updateAnswer_shouldThrow_whenAnswerIsBlank() {
         assertThrows(IllegalArgumentException.class,
                 () -> faqService.updateAnswer(1L, "   "));
+
+        verifyNoInteractions(faqRepository);
     }
 
+    @Test
+    void saveFaq_shouldSaveFaq() {
+        Faq faq = new Faq();
+        faq.setQuestion("reset password");
+        faq.setAnswer("Go to settings");
 
+        when(faqRepository.save(faq)).thenReturn(faq);
+
+        Faq result = faqService.saveFaq(faq);
+
+        assertEquals("reset password", result.getQuestion());
+        verify(faqRepository).save(faq);
+    }
+
+    @Test
+    void findFaqById_shouldReturnFaq_whenExists() {
+        Faq faq = new Faq();
+        faq.setQuestion("reset password");
+
+        when(faqRepository.findById(1L)).thenReturn(Optional.of(faq));
+
+        Faq result = faqService.findFaqById(1L);
+
+        assertNotNull(result);
+        assertEquals("reset password", result.getQuestion());
+    }
+
+    @Test
+    void deleteFaq_shouldDeleteById() {
+        faqService.deleteFaq(1L);
+
+        verify(faqRepository).deleteById(1L);
+    }
+
+    @Test
+    void findFaqByQuestion_shouldUseSearchService() {
+        Faq faq = new Faq();
+        faq.setQuestion("reset password");
+
+        when(faqSearchService.findBestMatch("password"))
+                .thenReturn(faq);
+
+        Faq result = faqService.findFaqByQuestion("password");
+
+        assertNotNull(result);
+        assertEquals("reset password", result.getQuestion());
+        verify(faqSearchService).findBestMatch("password");
+    }
 
 }

@@ -8,8 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class FaqSearchServiceTest {
 
@@ -56,6 +55,7 @@ class FaqSearchServiceTest {
     void shouldReturnNull_whenQuestionIsBlank() {
         Faq result = faqSearchService.findBestMatch("   ");
         assertNull(result);
+        verifyNoInteractions(faqRepository);
     }
 
     @Test
