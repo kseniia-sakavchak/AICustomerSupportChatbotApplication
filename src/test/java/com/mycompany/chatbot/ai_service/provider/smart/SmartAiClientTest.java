@@ -94,4 +94,12 @@ class SmartAiClientTest {
                 || result.toLowerCase().contains("error")
                 || result.toLowerCase().contains("describe"));
     }
+
+    @Test
+    void generateAnswer_shouldWork_whenHistoryIsNull() {
+        String result = smartAiClient.generateAnswer("reset password", null);
+
+        assertNotNull(result);
+        assertTrue(result.toLowerCase().contains("password"));
+    }
 }
