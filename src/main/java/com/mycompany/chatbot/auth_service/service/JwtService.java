@@ -55,7 +55,7 @@ public class JwtService {
 
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         JwtParser parser = Jwts.parser()
-                .verifyWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
+                .verifyWith(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)))
                 .build();
 
         Claims claims = parser.parseSignedClaims(token).getPayload();
